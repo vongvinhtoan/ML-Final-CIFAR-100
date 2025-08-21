@@ -2,4 +2,7 @@
 secrets/
 weights/
 datasets/
-problem.ipynb
+__pycache__/
+
+*.ipynb
+.DS_Store
