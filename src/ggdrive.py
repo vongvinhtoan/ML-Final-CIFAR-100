@@ -1,6 +1,6 @@
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from .configs import settings
+from configs import settings
 from pydantic import BaseModel
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]

@@ -1,0 +1,25 @@
+name: sweep_resnet
+method: random
+metric:
+  goal: maximize
+  name: validation_accuracy
+parameters:
+  learning_rate:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.1
+  batch_size:
+    distribution: categorical
+    values: [16, 32, 64, 128]
+  epochs:
+    distribution: categorical
+    values: [5, 10, 15]
+  optimizer:
+    distribution: categorical
+    values: ["adam", "sgd"]
+  loss:
+    distribution: constant
+    value: "categorical_crossentropy"
+  image_size:
+    distribution: constant
+    value: 32
