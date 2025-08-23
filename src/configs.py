@@ -12,5 +12,6 @@ class Settings:
         self.SWEEP_CONFIG_PATH = Path(os.getenv("SWEEP_CONFIG_PATH", ""))
         self.WEIGHT_PATH = Path(os.getenv("WEIGHT_PATH", ""))
         self.WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
+        self.WANDB_TEAM_NAME = os.getenv("WANDB_TEAM_NAME")
 
 settings = Settings()
