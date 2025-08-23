@@ -13,13 +13,13 @@ parameters:
     max: 0.1
   batch_size:
     distribution: categorical
-    values: [16, 32, 64, 128]
+    values: [32, 64, 128]
   epochs:
     distribution: categorical
-    values: [5, 10, 15]
+    values: [5, 10]
   optimizer:
     distribution: categorical
     values: ["adam", "sgd"]
   loss_fn:
     distribution: constant
-    value: "categorical_crossentropy"
+    value: "cross_entropy"

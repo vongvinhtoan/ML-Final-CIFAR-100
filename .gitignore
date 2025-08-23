@@ -2,6 +2,7 @@
 secrets/
 weights/
 datasets/
+wandb/
 __pycache__/
 
 *.ipynb

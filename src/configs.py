@@ -10,5 +10,6 @@ class Settings:
         self.GGDRIVE_FOLDER_ID = Path(os.getenv("GGDRIVE_FOLDER_ID", ""))
         self.DATASET_PATH = Path(os.getenv("DATASET_PATH", ""))
         self.SWEEP_CONFIG_PATH = Path(os.getenv("SWEEP_CONFIG_PATH", ""))
+        self.WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
 
 settings = Settings()

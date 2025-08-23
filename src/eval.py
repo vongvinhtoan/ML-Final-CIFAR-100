@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from torch import nn
 from torch.utils.data import DataLoader
 import torch
+from tqdm import tqdm
 import dataset
 
 
@@ -21,7 +22,7 @@ def eval(model: nn.Module, loss_fn: nn.Module) -> EvaluateReport:
     cifar100_val_loader = DataLoader(dataset.cifar100_val, batch_size=64)
 
     with torch.no_grad():
-        for images, labels in cifar100_val_loader:
+        for images, labels in tqdm(cifar100_val_loader, desc="Evaluating one epoch"):
             images, labels = images.to(device), labels.to(device)
 
             outputs = model(images)
