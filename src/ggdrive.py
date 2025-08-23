@@ -15,22 +15,23 @@ SCOPES = ["https://www.googleapis.com/auth/drive"]
 TOKEN_PATH = settings.SECRET_PATH / "token.json"
 CRED_PATH = settings.SECRET_PATH / "credentials.json"
 
-creds = None
-if os.path.exists(TOKEN_PATH):
-    creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
-if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-    else:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            CRED_PATH, SCOPES
-        )
-        creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
-    with open(TOKEN_PATH, "w") as token:
-        token.write(creds.to_json())
+def get_service():
+    creds = None
+    if os.path.exists(TOKEN_PATH):
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CRED_PATH, SCOPES
+            )
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open(TOKEN_PATH, "w") as token:
+            token.write(creds.to_json())
 
-service = build('drive', 'v3', credentials=creds)
+    return build('drive', 'v3', credentials=creds)
 
 
 class GGDriveFile(BaseModel):
@@ -49,6 +50,7 @@ class GGDrive:
         self.folder_id = settings.GGDRIVE_FOLDER_ID
 
     def ls(self) -> list[GGDriveFile]:
+        service = get_service()
         query = f"'{self.folder_id}' in parents"
         results = service.files().list(q=query, fields="files(id, name)").execute()
         items = results.get('files', [])
@@ -59,6 +61,7 @@ class GGDrive:
         return datetime.now().strftime("%y-%m-%d-%H-%M-%S")
 
     def upload_weight(self, model: nn.Module) -> str:
+        service = get_service()
         # build filename and save locally
         filename = f"{self._get_time_stamp()}.pth"
         filepath = settings.WEIGHT_PATH / filename

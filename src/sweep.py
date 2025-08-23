@@ -13,7 +13,7 @@ def main():
     if args.sweep_id:
         sweep_id = f"{settings.WANDB_TEAM_NAME}/{settings.WANDB_PROJECT_NAME}/{args.sweep_id}"
     else:
-        with open(settings.SWEEP_CONFIG_PATH / "sweep_resnet.yaml") as file:
+        with open(settings.SWEEP_CONFIG_PATH / "sweep.yaml") as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
         sweep_id = wandb.sweep(sweep=config, project=settings.WANDB_PROJECT_NAME)
 

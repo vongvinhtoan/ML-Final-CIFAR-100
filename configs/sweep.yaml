@@ -7,19 +7,20 @@ parameters:
   model:
     distribution: constant
     value: resnet
-  lr:
-    distribution: log_uniform_values
-    min: 0.0001
-    max: 0.1
-  batch_size:
-    distribution: categorical
-    values: [16, 32, 64, 128]
-  epochs:
-    distribution: categorical
-    values: [5, 10]
-  optimizer:
-    distribution: categorical
-    values: ["adam", "sgd"]
   loss_fn:
     distribution: constant
-    value: "cross_entropy"
+    value: cross_entropy
+  epochs:
+    distribution: int_uniform
+    min: 5
+    max: 10
+  lr:
+    distribution: log_uniform_values
+    min: 0.002
+    max: 0.01
+  batch_size:
+    distribution: categorical
+    values: [32, 64]
+  optimizer:
+    distribution: categorical
+    values: [adam, sgd]
