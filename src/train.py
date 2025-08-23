@@ -3,6 +3,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 import wandb
 from device import device
+from ggdrive import ggdrive
 from model import models
 from optimizer import optimizers
 from loss_fn import loss_fns
@@ -55,7 +56,6 @@ def train_one_epoch(
 
 def train(args=None):
     project = args.project if args else None
-    print(f"{project=}")
 
     with wandb.init(project=project) as run:
         run.config.update({"device": device})
@@ -83,3 +83,6 @@ def train(args=None):
                 "train_accuracy": train_accuracy,
                 **eval_report.model_dump()
             })
+
+        uploaded_url = ggdrive.upload_weight(model)
+        run.config.update({"url": uploaded_url})

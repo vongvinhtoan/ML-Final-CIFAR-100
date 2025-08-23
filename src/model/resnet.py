@@ -1,11 +1,11 @@
 import torch.nn as nn
 from torchvision import models
 
-
 class Resnet(nn.Module):
     def __init__(self):
-        super(Resnet, self).__init__()
-        self.model = models.resnet101(pretrained=True)
+        super().__init__()
+
+        self.model = models.resnet101(weights=models.ResNet101_Weights.DEFAULT)
         self.modify_model()
 
     def modify_model(self):
