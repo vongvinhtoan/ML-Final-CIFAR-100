@@ -1,7 +1,7 @@
 import torch
-from typing import Type
+from typing import Callable
 
-optimizers: dict[str, Type[torch.optim.Optimizer]] = {
+optimizers: dict[str, Callable[..., torch.optim.Optimizer]] = {
     'adam': torch.optim.Adam,
     'sgd': torch.optim.SGD
 }

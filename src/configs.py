@@ -9,5 +9,6 @@ class Settings:
         self.GGDRIVE_TOKEN_PATH = Path(os.getenv("GGDRIVE_TOKEN_PATH", ""))
         self.GGDRIVE_FOLDER_ID = Path(os.getenv("GGDRIVE_FOLDER_ID", ""))
         self.DATASET_PATH = Path(os.getenv("DATASET_PATH", ""))
+        self.SWEEP_CONFIG_PATH = Path(os.getenv("SWEEP_CONFIG_PATH", ""))
 
 settings = Settings()
