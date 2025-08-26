@@ -20,6 +20,9 @@ class TrainConfig(BaseModel):
     loss_fn: str
     batch_size: int
     lr: float
+    freeze_pretrained: bool
+    weight_init: bool
+    patience: int
 
 
 def train_one_epoch(
@@ -61,12 +64,17 @@ def train(args=None):
         run.config.update({"device": device})
         config = TrainConfig(**dict(run.config))
 
-        model = models[config.model]()
+        model = models[config.model](
+            freeze_pretrained=config.freeze_pretrained,
+            weight_init=config.weight_init
+        )
         model.to(device=device)
 
         loss_fn = loss_fns[config.loss_fn]
         optimizer = optimizers[config.optimizer](model.parameters(), lr=config.lr)
         cifar100_train_loader = DataLoader(dataset.cifar100_train, batch_size=config.batch_size)
+        patience_count = 0
+        best_val_loss = float("inf")
 
         for epoch in range(1, config.epochs+1):
             train_loss, train_accuracy = train_one_epoch(
@@ -77,12 +85,22 @@ def train(args=None):
             )
             eval_report = eval(model, loss_fn)
 
+            if best_val_loss <= eval_report.validation_loss:
+                patience_count += 1
+            else:
+                patience_count = 0
+                best_val_loss = eval_report.validation_loss
+
             run.log({
                 "epoch": epoch,
                 "train_loss": train_loss,
                 "train_accuracy": train_accuracy,
+                "patience_count": patience_count,
                 **eval_report.model_dump()
             })
+
+            if patience_count == config.patience:
+                break
 
         uploaded_url = ggdrive.upload_weight(model)
         run.config.update({"url": uploaded_url})

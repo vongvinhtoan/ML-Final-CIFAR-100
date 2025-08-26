@@ -16,11 +16,20 @@ parameters:
     max: 10
   lr:
     distribution: log_uniform_values
-    min: 0.002
+    min: 0.001
     max: 0.01
   batch_size:
     distribution: categorical
-    values: [32, 64]
+    values: [64, 128, 256]
   optimizer:
     distribution: categorical
     values: [adam, sgd]
+  freeze_pretrained:
+    distribution: categorical
+    values: [True, False]
+  weight_init:
+    distribution: categorical
+    values: [True, False]
+  patience:
+    distribution: constant
+    value: 3

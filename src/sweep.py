@@ -7,13 +7,14 @@ from configs import settings
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sweep_id", type=str, default=None, help="Existing W&B sweep ID")
+    parser.add_argument("--sweep_config", type=str, default="sweep_resnet", help="Existing W&B sweep ID")
     parser.add_argument("--count", type=int, default=5, help="Number of runs to launch")
     args = parser.parse_args()
 
     if args.sweep_id:
         sweep_id = f"{settings.WANDB_TEAM_NAME}/{settings.WANDB_PROJECT_NAME}/{args.sweep_id}"
     else:
-        with open(settings.SWEEP_CONFIG_PATH / "sweep.yaml") as file:
+        with open(settings.SWEEP_CONFIG_PATH / f"{args.sweep_config}.yaml") as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
         sweep_id = wandb.sweep(sweep=config, project=settings.WANDB_PROJECT_NAME)
 

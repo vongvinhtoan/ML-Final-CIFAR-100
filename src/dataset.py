@@ -4,8 +4,8 @@ from torchvision.transforms import transforms
 
 transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.5071, 0.4865, 0.4409),  # CIFAR-100 mean
-                         (0.2673, 0.2564, 0.2762))  # CIFAR-100 std
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
 ])
 
 cifar100_train = torchvision.datasets.CIFAR100(root=settings.DATASET_PATH, train=True, transform=transform, download=True)
