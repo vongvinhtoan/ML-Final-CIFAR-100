@@ -1,4 +1,4 @@
-name: sweep_effnet_l2
+name: sweep_effnet_b7
 method: random
 metric:
   goal: maximize
@@ -6,7 +6,7 @@ metric:
 parameters:
   model:
     distribution: constant
-    value: effnet_l2
+    value: effnet_b7
   loss_fn:
     distribution: constant
     value: cross_entropy
@@ -30,5 +30,5 @@ parameters:
     distribution: categorical
     values: [64, 128, 256]
   optimizer:
-    distribution: categorical
-    values: [adam, sgd]
+    distribution: constant
+    value: sgd
