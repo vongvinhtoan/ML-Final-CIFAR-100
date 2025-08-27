@@ -11,6 +11,7 @@ import dataset
 from pydantic import BaseModel
 from eval import eval
 from tqdm import tqdm
+from optimizer.base_optimizer import BaseOptimizer
 
 
 class TrainConfig(BaseModel):
@@ -29,7 +30,7 @@ def train_one_epoch(
     model: nn.Module,
     cifar100_train_loader: torch.utils.data.DataLoader,
     loss_fn: nn.Module,
-    optimizer: torch.optim.Optimizer
+    optimizer: BaseOptimizer
 ):
     model.train()
     total_loss = 0.0
@@ -39,15 +40,16 @@ def train_one_epoch(
     for images, labels in tqdm(cifar100_train_loader, desc="Training one epoch"):
         images, labels = images.to(device), labels.to(device)
 
-        outputs = model(images)
-        loss = loss_fn(outputs, labels)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        def closure():
+            optimizer.zero_grad()
+            output = model(images)
+            loss = loss_fn(output, labels)
+            return loss, output
+        
+        loss, output = optimizer.step(closure)
 
         total_loss += loss.item() * images.size(0)
-        _, preds = torch.max(outputs, 1)
+        _, preds = torch.max(output, 1)
         correct += (preds == labels).sum().item()
         total += labels.size(0)
     
