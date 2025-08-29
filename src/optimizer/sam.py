@@ -1,7 +1,7 @@
-from typing import Callable, Type, Iterable, Any
+from typing import Callable, Iterable, Any, List, Tuple
 import torch
 from torch import Tensor
-from torch.optim import Optimizer
+import torch.optim as optim
 from .base_optimizer import BaseOptimizer
 
 
@@ -9,60 +9,93 @@ class SAM(BaseOptimizer):
     def __init__(
         self,
         params: Iterable[torch.nn.parameter.Parameter],
-        base_optimizer_cls: Type[Optimizer],
         rho: float = 0.05,
         adaptive: bool = False,
         **kwargs: Any,
     ) -> None:
-        super().__init__(params, base_optimizer=base_optimizer_cls, **kwargs)
+        """
+        SAM wrapper that uses SGD as base optimizer by default.
+        Pass any optimizer kwargs (lr, momentum, etc.) via kwargs.
+        """
+        # materialize params and keep only trainable parameters
+        params_list = list(params)
+        trainable_params = [p for p in params_list if getattr(p, "requires_grad", True)]
+
+        # Initialize base optimizer with only trainable params
+        super().__init__(trainable_params, base_optimizer=optim.SGD, **kwargs)
+
         self.rho: float = rho
         self.adaptive: bool = adaptive
-        self.params: list[torch.nn.parameter.Parameter] = list(params)
+        # keep reference to trainable params for SAM ops
+        self.params: List[torch.nn.parameter.Parameter] = trainable_params
 
     @torch.no_grad()
     def first_step(self) -> None:
+        """Perturb parameters in the gradient direction (no grad tracking)."""
         grad_norm: Tensor = self._grad_norm()
-        scale: Tensor = self.rho / (grad_norm + 1e-12)
+        if grad_norm.item() == 0.0:
+            # nothing to do
+            return
+        scale: Tensor = (self.rho / (grad_norm + 1e-12)).to(self.params[0].device)
 
         for p in self.params:
             if p.grad is None:
                 continue
-            e_w: Tensor = (
-                (torch.pow(p, 2) if self.adaptive else 1.0) * p.grad * scale.to(p)
-            )
+            # adaptive weight scaling if requested
+            adv = (p.abs() if self.adaptive else 1.0)
+            e_w = adv * p.grad * scale
             p.add_(e_w)               # perturb weights
-            p.sam_e_w = e_w           # type: ignore
+            # store the perturbation for restore
+            setattr(p, "sam_e_w", e_w)
+
+        # Clear gradients so second forward builds a fresh graph
+        self.zero_grad()
 
     @torch.no_grad()
     def second_step(self) -> None:
+        """Restore weights and step the base optimizer (no grad tracking)."""
         for p in self.params:
             if hasattr(p, "sam_e_w"):
-                p.sub_(p.sam_e_w)     # type: ignore
-                del p.sam_e_w         # type: ignore
+                p.sub_(getattr(p, "sam_e_w"))
+                delattr = getattr  # small micro-opt
+                delattr(p, "sam_e_w")
+        # perform base optimizer step and clear grads
         self.base_optimizer.step()
+        self.zero_grad()
 
-    @torch.no_grad()
-    def step(self, closure: Callable[[], tuple[Tensor, Tensor]]) -> tuple[Tensor, Tensor]:
-        assert closure is not None, "SAM requires a closure for re-evaluating loss"
+    def step(self, closure: Callable[[], Tuple[Tensor, Tensor]]) -> Tuple[Tensor, Tensor]:
+        """
+        Expects closure to return (loss_tensor, output).
+        closure must not detach the loss (do not use .item()).
+        """
+        assert closure is not None, "SAM requires a closure that returns (loss, output)"
 
-        # first forward-backward
-        loss, output = closure()
-        loss.backward()
+        # first forward-backward with grad enabled
+        with torch.enable_grad():
+            loss, output = closure()
+            loss.backward()
+
+        # perturb weights
         self.first_step()
 
-        # second forward-backward
-        loss2, _ = closure()
-        loss2.backward()
+        # second forward-backward with grad enabled on perturbed weights
+        with torch.enable_grad():
+            loss2, _ = closure()
+            loss2.backward()
+
+        # restore and step
         self.second_step()
 
         return loss, output
 
     def _grad_norm(self) -> Tensor:
-        norms: list[Tensor] = []
+        """Compute norm of gradients over trainable params."""
+        norms: List[Tensor] = []
         for p in self.params:
             if p.grad is not None:
-                g: Tensor = (torch.abs(p) if self.adaptive else 1.0) * p.grad
+                g = (p.abs() if self.adaptive else 1.0) * p.grad
                 norms.append(g.norm(p=2))
         if not norms:
-            return torch.tensor(0.0, device=self.params[0].device)
+            device = self.params[0].device if self.params else torch.device("cpu")
+            return torch.tensor(0.0, device=device)
         return torch.norm(torch.stack(norms), p=2)

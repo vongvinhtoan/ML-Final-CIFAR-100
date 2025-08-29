@@ -1,0 +1,34 @@
+name: sweep_effnet_b7_sam
+method: random
+metric:
+  goal: maximize
+  name: validation_accuracy
+parameters:
+  model:
+    distribution: constant
+    value: effnet_b7
+  loss_fn:
+    distribution: constant
+    value: cross_entropy
+  epochs:
+    distribution: constant
+    value: 30
+  freeze_pretrained:
+    distribution: constant
+    value: False
+  weight_init:
+    distribution: constant
+    value: True
+  patience:
+    distribution: constant
+    value: 3
+  lr:
+    distribution: log_uniform_values
+    min: 0.005
+    max: 0.05
+  batch_size:
+    distribution: categorical
+    values: [64, 128, 256]
+  optimizer:
+    distribution: categorical
+    values: [sgd, sam]
