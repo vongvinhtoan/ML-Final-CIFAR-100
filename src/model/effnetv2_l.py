@@ -3,8 +3,12 @@ import torch.nn.init as init
 from torchvision import models
 
 class EfficientNetV2_L(nn.Module):
-    def __init__(self, freeze_pretrained=False, weight_init=False):
+    def __init__(self, **kwargs):
         super().__init__()
+
+        freeze_pretrained=kwargs['freeze_pretrained']
+        weight_init=kwargs['weight_init']
+        
         # Use EfficientNet-B7 with pretrained weights
         self.model = models.efficientnet_v2_l(weights=models.EfficientNet_V2_L_Weights.DEFAULT)
 

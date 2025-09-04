@@ -3,8 +3,11 @@ import torch.nn.init as init
 from torchvision import models
 
 class Resnet(nn.Module):
-    def __init__(self, freeze_pretrained=False, weight_init=False):
+    def __init__(self, **kwargs):
         super().__init__()
+
+        freeze_pretrained=kwargs['freeze_pretrained']
+        weight_init=kwargs['weight_init']
 
         # Load pretrained ResNet101
         self.model = models.resnet101(weights=models.ResNet101_Weights.DEFAULT)

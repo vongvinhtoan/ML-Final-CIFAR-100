@@ -1,0 +1,38 @@
+name: sweep_mlp
+method: random
+metric:
+  goal: maximize
+  name: validation_accuracy
+parameters:
+  model:
+    distribution: constant
+    value: mlp
+  loss_fn:
+    distribution: constant
+    value: cross_entropy
+  epochs:
+    distribution: constant
+    value: 200
+  lr:
+    distribution: log_uniform_values
+    min: 0.001
+    max: 0.01
+  batch_size:
+    distribution: categorical
+    values: [64, 128, 256]
+  optimizer:
+    distribution: categorical
+    values: [adam, sgd, sam]
+  weight_init:
+    distribution: categorical
+    values: [True, False]
+  hidden_layers:
+    distribution: categorical
+    values: [
+      [512, 512],
+      [256, 256],
+      [128, 128, 128]
+    ]
+  patience:
+    distribution: constant
+    value: 10

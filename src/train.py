@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import wandb
 from device import device
 from ggdrive import ggdrive
-from model import models
+from model import models, model_size
 from optimizer import optimizers
 from loss_fn import loss_fns
 import dataset
@@ -12,18 +12,6 @@ from pydantic import BaseModel
 from eval import eval
 from tqdm import tqdm
 from optimizer.base_optimizer import BaseOptimizer
-
-
-class TrainConfig(BaseModel):
-    model: str
-    epochs: int
-    optimizer: str
-    loss_fn: str
-    batch_size: int
-    lr: float
-    freeze_pretrained: bool
-    weight_init: bool
-    patience: int
 
 
 def train_one_epoch(
@@ -64,21 +52,21 @@ def train(args=None):
 
     with wandb.init(project=project) as run:
         run.config.update({"device": device})
-        config = TrainConfig(**dict(run.config))
 
-        model = models[config.model](
-            freeze_pretrained=config.freeze_pretrained,
-            weight_init=config.weight_init
+        model = models[run.config['model']](
+            **dict(run.config)
         )
         model.to(device=device)
 
-        loss_fn = loss_fns[config.loss_fn]
-        optimizer = optimizers[config.optimizer](model.parameters(), lr=config.lr)
-        cifar100_train_loader = DataLoader(dataset.cifar100_train, batch_size=config.batch_size)
+        run.config.update(model_size(model))
+
+        loss_fn = loss_fns[run.config["loss_fn"]]
+        optimizer = optimizers[run.config["optimizer"]](model.parameters(), lr=run.config["lr"])
+        cifar100_train_loader = DataLoader(dataset.cifar100_train, batch_size=run.config["batch_size"])
         patience_count = 0
         best_val_loss = float("inf")
 
-        for epoch in range(1, config.epochs+1):
+        for epoch in range(1, run.config["epochs"]+1):
             train_loss, train_accuracy = train_one_epoch(
                 model,
                 cifar100_train_loader,
@@ -101,7 +89,7 @@ def train(args=None):
                 **eval_report.model_dump()
             })
 
-            if patience_count == config.patience:
+            if patience_count == run.config["patience"]:
                 break
 
         uploaded_url = ggdrive.upload_weight(model)
