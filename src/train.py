@@ -8,7 +8,6 @@ from model import models, model_size
 from optimizer import optimizers
 from loss_fn import loss_fns
 import dataset
-from pydantic import BaseModel
 from eval import eval
 from tqdm import tqdm
 from optimizer.base_optimizer import BaseOptimizer
@@ -53,20 +52,32 @@ def train(args=None):
     with wandb.init(project=project) as run:
         run.config.update({"device": device})
 
-        model = models[run.config['model']](
+        cfg_model = run.config["model"]
+        cfg_loss_fn = run.config["loss_fn"]
+        cfg_optimizer = run.config["optimizer"]
+        cfg_lr = run.config["lr"]
+        cfg_batch_size = run.config["batch_size"]
+        cfg_epochs = run.config["epochs"]
+        cfg_patience = run.config["patience"]
+        cfg_augmentation = run.config.get("augmentation", "base")
+
+        model = models[cfg_model](
             **dict(run.config)
         )
         model.to(device=device)
 
         run.config.update(model_size(model))
 
-        loss_fn = loss_fns[run.config["loss_fn"]]
-        optimizer = optimizers[run.config["optimizer"]](model.parameters(), lr=run.config["lr"])
-        cifar100_train_loader = DataLoader(dataset.cifar100_train, batch_size=run.config["batch_size"])
+        loss_fn = loss_fns[cfg_loss_fn]
+        optimizer = optimizers[cfg_optimizer](model.parameters(), lr=cfg_lr)
+        cifar100_train_loader = DataLoader(
+            dataset.get_train_loader(cfg_augmentation), 
+            batch_size=cfg_batch_size
+        )
         patience_count = 0
         best_val_loss = float("inf")
 
-        for epoch in range(1, run.config["epochs"]+1):
+        for epoch in range(1, cfg_epochs+1):
             train_loss, train_accuracy = train_one_epoch(
                 model,
                 cifar100_train_loader,
@@ -89,7 +100,7 @@ def train(args=None):
                 **eval_report.model_dump()
             })
 
-            if patience_count == run.config["patience"]:
+            if patience_count == cfg_patience:
                 break
 
         uploaded_url = ggdrive.upload_weight(model)

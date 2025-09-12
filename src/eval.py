@@ -19,7 +19,7 @@ def eval(model: nn.Module, loss_fn: nn.Module) -> EvaluateReport:
     total = 0
 
     device = next(model.parameters()).device
-    cifar100_val_loader = DataLoader(dataset.cifar100_val, batch_size=64)
+    cifar100_val_loader = DataLoader(dataset.get_val_loader(), batch_size=64)
 
     with torch.no_grad():
         for images, labels in tqdm(cifar100_val_loader, desc="Evaluating one epoch"):

@@ -32,3 +32,11 @@ parameters:
   optimizer:
     distribution: categorical
     values: [sgd, sam]
+  augmentation:
+    distribution: categorical
+    values:
+    - base
+    - aa
+    - ra
+    - advprop+aa
+    - noisystudent+ra
