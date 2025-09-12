@@ -73,7 +73,8 @@ def train(args=None):
         optimizer = optimizers[cfg_optimizer](model.parameters(), lr=cfg_lr)
         cifar100_train_loader = DataLoader(
             dataset.get_train_loader(cfg_augmentation, cfg_concat), 
-            batch_size=cfg_batch_size
+            batch_size=cfg_batch_size,
+            shuffle=True
         )
         patience_count = 0
         best_val_loss = float("inf")
