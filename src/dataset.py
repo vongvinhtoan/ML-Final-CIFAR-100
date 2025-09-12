@@ -50,17 +50,13 @@ cifar100_transform: dict = {
 }
 
 
-def get_train_loader(augmentation: str = "base", concat: bool = False):
+def get_train_loader(augmentation: str = "base", partition: str = "train"):
     train_set = torchvision.datasets.CIFAR100(
         root=settings.DATASET_PATH, 
         train=True, 
         transform=cifar100_transform[augmentation], 
         download=True
     )
-
-    if not concat:
-        return train_set
-    
     test_set = torchvision.datasets.CIFAR100(
         root=settings.DATASET_PATH, 
         train=False, 
@@ -68,7 +64,12 @@ def get_train_loader(augmentation: str = "base", concat: bool = False):
         download=True
     )
 
-    return ConcatDataset([train_set, test_set])
+    if partition == "train":
+        return train_set
+    elif partition == "test":
+        return test_set
+    else:
+        return ConcatDataset([train_set, test_set])
 
 def get_val_loader():
     return torchvision.datasets.CIFAR100(

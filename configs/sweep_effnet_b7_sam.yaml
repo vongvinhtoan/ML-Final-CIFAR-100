@@ -40,6 +40,9 @@ parameters:
     # - ra
     # - advprop+aa
     - noisystudent+ra
-  concat:
+  partition:
     distribution: categorical
-    values: [True]
+    values:
+    # - both
+    # - train
+    - test

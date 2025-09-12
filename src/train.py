@@ -60,7 +60,7 @@ def train(args=None):
         cfg_epochs = run.config["epochs"]
         cfg_patience = run.config["patience"]
         cfg_augmentation = run.config.get("augmentation", "base")
-        cfg_concat = run.config.get("concat", True)
+        cfg_partition = run.config.get("partition", "test")
 
         model = models[cfg_model](
             **dict(run.config)
@@ -72,7 +72,7 @@ def train(args=None):
         loss_fn = loss_fns[cfg_loss_fn]
         optimizer = optimizers[cfg_optimizer](model.parameters(), lr=cfg_lr)
         cifar100_train_loader = DataLoader(
-            dataset.get_train_loader(cfg_augmentation, cfg_concat), 
+            dataset.get_train_loader(cfg_augmentation, cfg_partition), 
             batch_size=cfg_batch_size,
             shuffle=True
         )
