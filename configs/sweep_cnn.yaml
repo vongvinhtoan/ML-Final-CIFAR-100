@@ -1,4 +1,4 @@
-name: sweep_effnet_b7_sam
+name: sweep_cnn
 method: random
 metric:
   goal: maximize
@@ -6,25 +6,16 @@ metric:
 parameters:
   model:
     distribution: constant
-    value: effnet_b7
+    value: cnn
   loss_fn:
     distribution: constant
     value: cross_entropy
   epochs:
     distribution: constant
-    value: 50
-  freeze_pretrained:
-    distribution: constant
-    value: False
-  weight_init:
-    distribution: constant
-    value: True
-  patience:
-    distribution: constant
-    value: 2
+    value: 200
   lr:
     distribution: log_uniform_values
-    min: 0.01
+    min: 0.009
     max: 0.06
   batch_size:
     distribution: categorical
@@ -32,17 +23,17 @@ parameters:
   optimizer:
     distribution: categorical
     values: [sam]
+  weight_init:
+    distribution: categorical
+    values: [True]
+  patience:
+    distribution: constant
+    value: 10
   augmentation:
     distribution: categorical
     values:
-    # - base
-    # - aa
-    # - ra
-    # - advprop+aa
     - noisystudent+ra
   partition:
     distribution: categorical
     values:
-    # - both
-    # - train
     - test

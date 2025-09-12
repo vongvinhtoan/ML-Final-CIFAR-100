@@ -4,6 +4,7 @@ from .effnetv2_l import EfficientNetV2_L
 from .effnetv2_m import EfficientNetV2_M
 from .effnet_b7 import EfficientNet_B7
 from .mlp import MLP
+from .cnn import SmallCNN
 from typing import Type, Any
 
 
@@ -12,7 +13,8 @@ models: dict[str, Type[nn.Module]] = {
     'effnetv2_l': EfficientNetV2_L,
     'effnetv2_m': EfficientNetV2_M,
     'effnet_b7': EfficientNet_B7,
-    'mlp': MLP
+    'mlp': MLP,
+    'cnn': SmallCNN,
 }
 
 
