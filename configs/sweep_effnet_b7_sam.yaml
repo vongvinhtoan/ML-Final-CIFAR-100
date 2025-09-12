@@ -12,7 +12,7 @@ parameters:
     value: cross_entropy
   epochs:
     distribution: constant
-    value: 30
+    value: 100
   freeze_pretrained:
     distribution: constant
     value: False
@@ -21,7 +21,7 @@ parameters:
     value: True
   patience:
     distribution: constant
-    value: 3
+    value: 2
   lr:
     distribution: log_uniform_values
     min: 0.005
@@ -31,12 +31,15 @@ parameters:
     values: [64, 128, 256]
   optimizer:
     distribution: categorical
-    values: [sgd, sam]
+    values: [sam]
   augmentation:
     distribution: categorical
     values:
-    - base
-    - aa
-    - ra
-    - advprop+aa
+    # - base
+    # - aa
+    # - ra
+    # - advprop+aa
     - noisystudent+ra
+  concat:
+    distribution: categorical
+    values: [True]

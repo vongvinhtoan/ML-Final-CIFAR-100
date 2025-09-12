@@ -3,6 +3,7 @@ import torchvision
 import torch
 from torchvision.transforms import transforms
 from torchvision.transforms import AutoAugment, AutoAugmentPolicy, RandAugment
+from torch.utils.data import ConcatDataset
 
 base_transform = transforms.Compose([
     transforms.ToTensor(),
@@ -49,14 +50,25 @@ cifar100_transform: dict = {
 }
 
 
-def get_train_loader(augmentation: str = "base"):
-    return torchvision.datasets.CIFAR100(
+def get_train_loader(augmentation: str = "base", concat: bool = False):
+    train_set = torchvision.datasets.CIFAR100(
         root=settings.DATASET_PATH, 
         train=True, 
         transform=cifar100_transform[augmentation], 
         download=True
     )
 
+    if not concat:
+        return train_set
+    
+    test_set = torchvision.datasets.CIFAR100(
+        root=settings.DATASET_PATH, 
+        train=False, 
+        transform=cifar100_transform[augmentation], 
+        download=True
+    )
+
+    return ConcatDataset([train_set, test_set])
 
 def get_val_loader():
     return torchvision.datasets.CIFAR100(
