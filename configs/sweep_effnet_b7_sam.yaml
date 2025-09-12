@@ -12,7 +12,7 @@ parameters:
     value: cross_entropy
   epochs:
     distribution: constant
-    value: 100
+    value: 50
   freeze_pretrained:
     distribution: constant
     value: False
