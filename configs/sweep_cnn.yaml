@@ -32,8 +32,12 @@ parameters:
   augmentation:
     distribution: categorical
     values:
-    - noisystudent+ra
+    - base_transform
+    - autoaugment
+    - randaugment
+    - advprop_aa
+    - noisystudent_ra
   partition:
     distribution: categorical
     values:
-    - test
+    - train
