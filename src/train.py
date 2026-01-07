@@ -17,7 +17,7 @@ def train_one_epoch(
     model: nn.Module,
     cifar100_train_loader: torch.utils.data.DataLoader,
     loss_fn: nn.Module,
-    optimizer: BaseOptimizer
+    optimizer: BaseOptimizer,
 ):
     model.train()
     total_loss = 0.0
@@ -32,14 +32,14 @@ def train_one_epoch(
             output = model(images)
             loss = loss_fn(output, labels)
             return loss, output
-        
+
         loss, output = optimizer.step(closure)
 
         total_loss += loss.item() * images.size(0)
         _, preds = torch.max(output, 1)
         correct += (preds == labels).sum().item()
         total += labels.size(0)
-    
+
     avg_loss = total_loss / total
     acc = correct / total
 
@@ -62,9 +62,7 @@ def train(args=None):
         cfg_augmentation = run.config.get("augmentation", "base")
         cfg_partition = run.config.get("partition", "test")
 
-        model = models[cfg_model](
-            **dict(run.config)
-        )
+        model = models[cfg_model](**dict(run.config))
         model.to(device=device)
 
         run.config.update(model_size(model))
@@ -72,19 +70,16 @@ def train(args=None):
         loss_fn = loss_fns[cfg_loss_fn]
         optimizer = optimizers[cfg_optimizer](model.parameters(), lr=cfg_lr)
         cifar100_train_loader = DataLoader(
-            dataset.get_train_loader(cfg_augmentation, cfg_partition), 
+            dataset.get_train_loader(cfg_augmentation, cfg_partition),
             batch_size=cfg_batch_size,
-            shuffle=True
+            shuffle=True,
         )
         patience_count = 0
         best_val_loss = float("inf")
 
-        for epoch in range(1, cfg_epochs+1):
+        for epoch in range(1, cfg_epochs + 1):
             train_loss, train_accuracy = train_one_epoch(
-                model,
-                cifar100_train_loader,
-                loss_fn,
-                optimizer
+                model, cifar100_train_loader, loss_fn, optimizer
             )
             eval_report = eval(model, loss_fn)
 
@@ -94,13 +89,15 @@ def train(args=None):
                 patience_count = 0
                 best_val_loss = eval_report.validation_loss
 
-            run.log({
-                "epoch": epoch,
-                "train_loss": train_loss,
-                "train_accuracy": train_accuracy,
-                "patience_count": patience_count,
-                **eval_report.model_dump()
-            })
+            run.log(
+                {
+                    "epoch": epoch,
+                    "train_loss": train_loss,
+                    "train_accuracy": train_accuracy,
+                    "patience_count": patience_count,
+                    **eval_report.model_dump(),
+                }
+            )
 
             if patience_count == cfg_patience:
                 break

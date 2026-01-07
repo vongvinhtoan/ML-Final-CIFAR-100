@@ -5,7 +5,7 @@ from .sam import SAM
 from .sgd import SGD
 
 optimizers: dict[str, Callable[..., BaseOptimizer]] = {
-    'adam': Adam,
-    'sgd': SGD,
-    'sam': SAM
+    "adam": Adam,
+    "sgd": SGD,
+    "sam": SAM,
 }

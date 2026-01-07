@@ -36,7 +36,4 @@ def eval(model: nn.Module, loss_fn: nn.Module) -> EvaluateReport:
     avg_loss = val_loss / total
     accuracy = correct / total
 
-    return EvaluateReport(
-        validation_loss=avg_loss,
-        validation_accuracy=accuracy
-    )
+    return EvaluateReport(validation_loss=avg_loss, validation_accuracy=accuracy)

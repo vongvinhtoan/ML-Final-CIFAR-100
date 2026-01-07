@@ -2,12 +2,13 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 
+
 class MLP(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
-        weight_init: bool = kwargs['weight_init']
-        hidden_layers: list[int] = kwargs['hidden_layers']
+        weight_init: bool = kwargs["weight_init"]
+        hidden_layers: list[int] = kwargs["hidden_layers"]
 
         input_dim = 32 * 32 * 3
         output_dim = 100

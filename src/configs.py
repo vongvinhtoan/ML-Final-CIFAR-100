@@ -4,6 +4,7 @@ import os
 
 load_dotenv(".env.local")
 
+
 class Settings:
     def __init__(self) -> None:
         self.GGDRIVE_FOLDER_ID = Path(os.getenv("GGDRIVE_FOLDER_ID", ""))
@@ -13,5 +14,6 @@ class Settings:
         self.SECRET_PATH = Path(os.getenv("SECRET_PATH", ""))
         self.WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
         self.WANDB_TEAM_NAME = os.getenv("WANDB_TEAM_NAME")
+
 
 settings = Settings()

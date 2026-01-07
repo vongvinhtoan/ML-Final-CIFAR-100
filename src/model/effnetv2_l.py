@@ -2,15 +2,18 @@ import torch.nn as nn
 import torch.nn.init as init
 from torchvision import models
 
+
 class EfficientNetV2_L(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
-        freeze_pretrained=kwargs['freeze_pretrained']
-        weight_init=kwargs['weight_init']
-        
+        freeze_pretrained = kwargs["freeze_pretrained"]
+        weight_init = kwargs["weight_init"]
+
         # Use EfficientNet-B7 with pretrained weights
-        self.model = models.efficientnet_v2_l(weights=models.EfficientNet_V2_L_Weights.DEFAULT)
+        self.model = models.efficientnet_v2_l(
+            weights=models.EfficientNet_V2_L_Weights.DEFAULT
+        )
 
         # Change first conv to fit CIFAR (32x32)
         # Original: Conv2d(3, 32, kernel_size=3, stride=2, padding=1)
@@ -33,7 +36,9 @@ class EfficientNetV2_L(nn.Module):
         # Optionally freeze everything except first conv and classifier
         if freeze_pretrained:
             for name, param in self.model.named_parameters():
-                if not name.startswith("features.0.0") and not name.startswith("classifier"):
+                if not name.startswith("features.0.0") and not name.startswith(
+                    "classifier"
+                ):
                     param.requires_grad = False
 
     def forward(self, x):

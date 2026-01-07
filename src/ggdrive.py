@@ -15,6 +15,7 @@ SCOPES = ["https://www.googleapis.com/auth/drive"]
 TOKEN_PATH = settings.SECRET_PATH / "token.json"
 CRED_PATH = settings.SECRET_PATH / "credentials.json"
 
+
 def get_service():
     creds = None
     if os.path.exists(TOKEN_PATH):
@@ -23,15 +24,13 @@ def get_service():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                CRED_PATH, SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file(CRED_PATH, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open(TOKEN_PATH, "w") as token:
             token.write(creds.to_json())
 
-    return build('drive', 'v3', credentials=creds)
+    return build("drive", "v3", credentials=creds)
 
 
 class GGDriveFile(BaseModel):
@@ -53,10 +52,10 @@ class GGDrive:
         service = get_service()
         query = f"'{self.folder_id}' in parents"
         results = service.files().list(q=query, fields="files(id, name)").execute()
-        items = results.get('files', [])
+        items = results.get("files", [])
 
         return [GGDriveFile(**item) for item in items]
-    
+
     def _get_time_stamp(self) -> str:
         return datetime.now().strftime("%y-%m-%d-%H-%M-%S")
 
@@ -69,12 +68,13 @@ class GGDrive:
         torch.save(model.state_dict(), filepath)
 
         # upload to Google Drive
-        file_metadata = {
-            "name": filename,
-            "parents": [str(self.folder_id)]
-        }
+        file_metadata = {"name": filename, "parents": [str(self.folder_id)]}
         media = MediaFileUpload(str(filepath), mimetype="application/octet-stream")
-        uploaded = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+        uploaded = (
+            service.files()
+            .create(body=file_metadata, media_body=media, fields="id")
+            .execute()
+        )
 
         file_id = uploaded.get("id")
         return f"https://drive.google.com/file/d/{file_id}"

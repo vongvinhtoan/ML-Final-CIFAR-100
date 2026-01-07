@@ -42,9 +42,9 @@ class SAM(BaseOptimizer):
             if p.grad is None:
                 continue
             # adaptive weight scaling if requested
-            adv = (p.abs() if self.adaptive else 1.0)
+            adv = p.abs() if self.adaptive else 1.0
             e_w = adv * p.grad * scale
-            p.add_(e_w)               # perturb weights
+            p.add_(e_w)  # perturb weights
             # store the perturbation for restore
             setattr(p, "sam_e_w", e_w)
 
@@ -63,7 +63,9 @@ class SAM(BaseOptimizer):
         self.base_optimizer.step()
         self.zero_grad()
 
-    def step(self, closure: Callable[[], Tuple[Tensor, Tensor]]) -> Tuple[Tensor, Tensor]:
+    def step(
+        self, closure: Callable[[], Tuple[Tensor, Tensor]]
+    ) -> Tuple[Tensor, Tensor]:
         """
         Expects closure to return (loss_tensor, output).
         closure must not detach the loss (do not use .item()).

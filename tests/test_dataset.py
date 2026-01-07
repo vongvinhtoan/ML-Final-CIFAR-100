@@ -3,7 +3,9 @@ from configs import settings
 
 
 def test_import():
-    assert settings.DATASET_PATH.exists(), f"The dataset path must exists at {settings.DATASET_PATH}"
+    assert settings.DATASET_PATH.exists(), (
+        f"The dataset path must exists at {settings.DATASET_PATH}"
+    )
 
 
 def test_dataset_shape():

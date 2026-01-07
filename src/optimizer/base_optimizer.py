@@ -9,7 +9,9 @@ class BaseOptimizer(Optimizer):
         self.base_optimizer = base_optimizer(params, **kwargs)
         super().__init__(self.base_optimizer.param_groups, self.base_optimizer.defaults)
 
-    def step(self, closure: Callable[[], tuple[torch.Tensor, torch.Tensor]]) -> tuple[torch.Tensor, torch.Tensor]:
+    def step(
+        self, closure: Callable[[], tuple[torch.Tensor, torch.Tensor]]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         loss, output = closure()
         loss.backward()
         self.base_optimizer.step()
